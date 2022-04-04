@@ -1,0 +1,1 @@
+{"name":"Local: hi","url":"c:\\Users\\HP\\Desktop\\VsCodeCp\\hi.cpp","tests":[{"id":1644072554706,"input":"1\n2\n2 8\n2 16\n2 91\n2 79\n2 32\n2 64\n3 91\n3 75\n4 20\n4 11\n5\n6","output":""}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"c:\\Users\\HP\\Desktop\\VsCodeCp\\hi.cpp","group":"local","local":true}
