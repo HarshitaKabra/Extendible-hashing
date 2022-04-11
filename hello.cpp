@@ -1,221 +1,539 @@
-
-
-#include <bits/stdc++.h>
-
-#define ll long long
-#define pb push_back
-#define mp make_pair
-#define be begin()
-#define en end()
-#define all(v) v.be, v.en
-#define le length()
-#define fi first
-#define se second
-#define lb lower_bound()
-#define ub upper_bound()
-#define endl "\n"
-#define inf LLONG_MAX
-
-#define forz(i, n) for (ll i = 0; i < n; i++)
-#define fora(i, m, n) for (ll i = m; i < n; i++)
-#define rforz(i, n) for (ll i = n - 1; i >= 0; i--)
-#define rfora(i, m, n) for (ll i = n; i >= m; i--)
-
-#define vll vector<ll>
-#define vpll vector<pair<ll, ll>>
-#define mll map<ll, ll>
-#define pll pair<ll, ll>
-
-#define P0(a) cout << a << " "
-#define P1(a) cout << a << endl
-#define PYES cout << "YES\n"
-#define PNO cout << "NO\n"
-
-#define rev(v) reverse(v.be, v.en)
-#define srt(v) sort(all(v));
-
-#define collect(v, n)          \
-    for (ll i = 0; i < n; i++) \
-    {                          \
-        cin >> v[i];           \
-    }
-
-// sort(a.rbegin(), a.rend());
-////////////////////////////////////////////////////////////////////////////////////////////////////
-/////////=======================FUNCIONS======================================================////////
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-
+// C++ program for implementing B+ Tree
+#include <climits>
+#include <fstream>
+#include <iostream>
+#include<bits/stdc++.h>
 using namespace std;
-string ltrim(const string &);
-string rtrim(const string &);
-vector<string> split(const string &);
-ll M = 1000000007;
+int d, t;
+int data = 0;
+int index1 = 0;
+vector<int>v;
+int MAX = 6;
 
-void fast()
+
+// BP node
+class Node {
+	bool IS_LEAF;
+	int *key, size;
+	Node** ptr;
+	friend class BPTree;
+
+public:
+	Node();
+};
+
+// BP tree
+class BPTree {
+	Node* root;
+	void insertInternal(int,
+						Node*,
+						Node*);
+	Node* findParent(Node*, Node*);
+
+public:
+	BPTree();
+	void search(int);
+	void insert(int);
+	void display(Node*);
+	Node* getRoot();
+    void status();
+};
+
+// Constructor of Node
+Node::Node()
 {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    cout.tie(NULL);
+	key = new int[MAX];
+	ptr = new Node*[MAX + 1];
 }
 
-ll pow(ll a, ll b, ll m)
+// Initialise the BPTree Node
+BPTree::BPTree()
 {
-    ll ans = 1;
-    while (b)
+	root = NULL;
+}
+
+// Function to find any element
+// in B+ Tree
+void BPTree::search(int x)
+{
+
+	// If tree is empty
+	if (root == NULL) {
+		cout << "0 0"<<endl;
+	}
+
+	// Traverse to find the value
+	else {
+
+		Node* cursor = root;
+
+		// Till we reach leaf node
+		while (cursor->IS_LEAF == false) {
+
+			for (int i = 0;
+				i < cursor->size; i++) {
+
+				// If the element to be
+				// found is not present
+				if (x < cursor->key[i]) {
+					cursor = cursor->ptr[i];
+					break;
+				}
+
+				// If reaches end of the
+				// cursor node
+				if (i == cursor->size - 1) {
+					cursor = cursor->ptr[i + 1];
+					break;
+				}
+			}
+		}
+
+		// Traverse the cursor and find
+		// the node with value x
+		for (int i = 0;
+			i < cursor->size; i++) {
+
+			// If found then return
+			if (cursor->key[i] == x) {
+				cout << "Found\n";
+				return;
+			}
+		}
+
+		// Else element is not present
+		cout << "Not found\n";
+	}
+}
+
+
+void BPTree::status()
+{
+    cout<<index1<<" "<<data<<" ";
+    Node* cursor = root;
+    for(int i = 0; i<cursor->size; i++)
     {
-        if (b & 1)
-            ans = (ans * a) % m;
-        b /= 2;
-        a = (a * a) % m;
+        cout<<cursor->key[i]<<" ";
     }
-    return ans;
+    cout<<endl;
+
 }
 
-ll power(ll a, ll b)
+// Function to implement the Insert
+// Operation in B+ Tree
+void BPTree::insert(int x)
 {
-    ll s = 1;
-    for (int x = 0; x < b; x++)
-    {
-        s *= a;
-    }
-    return s;
+
+	// If root is null then return
+	// newly created node
+	if (root == NULL) {
+		root = new Node;
+        data++;
+		root->key[0] = x;
+		root->IS_LEAF = true;
+		root->size = 1;
+	}
+
+	// Traverse the B+ Tree
+	else {
+		Node* cursor = root;
+		Node* parent;
+
+		// Till cursor reaches the
+		// leaf node
+		while (cursor->IS_LEAF
+			== false) {
+
+			parent = cursor;
+
+			for (int i = 0;
+				i < cursor->size;
+				i++) {
+
+				// If found the position
+				// where we have to insert
+				// node
+				if (x < cursor->key[i]) {
+					cursor
+						= cursor->ptr[i];
+					break;
+				}
+
+				// If reaches the end
+				if (i == cursor->size - 1) {
+					cursor
+						= cursor->ptr[i + 1];
+					break;
+				}
+			}
+		}
+
+		if (cursor->size < d) {
+			int i = 0;
+            
+			while (x > cursor->key[i]
+				&& i < cursor->size) {
+				i++;
+                if(i>=cursor->size)
+                break;
+			}
+
+			for (int j = cursor->size;
+				j > i; j--) {
+				cursor->key[j]
+					= cursor->key[j - 1];
+			}
+
+			cursor->key[i] = x;
+			cursor->size++;
+
+			cursor->ptr[cursor->size]
+				= cursor->ptr[cursor->size - 1];
+			cursor->ptr[cursor->size - 1] = NULL;
+		}
+
+		else {
+
+			// Create a newLeaf node
+			Node* newLeaf = new Node;
+            data++;
+            int oo = d;
+			int virtualNode[oo+1];
+
+			// Update cursor to virtual
+			// node created
+			for (int i = 0; i < d; i++) {
+				virtualNode[i]
+					= cursor->key[i];
+			}
+			int i = 0, j;
+
+			// Traverse to find where the new
+			// node is to be inserted
+			
+            while (x > virtualNode[i]
+				&& i < d) {
+				i++;
+                if(i>=d)
+                break;
+			}
+
+			// Update the current virtual
+			// Node to its previous
+			for (int j = d;
+				j > i; j--) {
+				virtualNode[j]
+					= virtualNode[j - 1];
+			}
+
+			virtualNode[i] = x;
+			newLeaf->IS_LEAF = true;
+
+			cursor->size = (d + 1) / 2;
+			newLeaf->size
+				= d + 1 - (d + 1) / 2;
+
+			cursor->ptr[cursor->size]
+				= newLeaf;
+
+			newLeaf->ptr[newLeaf->size]
+				= cursor->ptr[d];
+
+			cursor->ptr[d] = NULL;
+
+			// Update the current virtual
+			// Node's key to its previous
+			for (i = 0;
+				i < cursor->size; i++) {
+				cursor->key[i]
+					= virtualNode[i];
+			}
+
+			// Update the newLeaf key to
+			// virtual Node
+			for (i = 0, j = cursor->size;
+				i < newLeaf->size;
+				i++, j++) {
+				newLeaf->key[i]
+					= virtualNode[j];
+			}
+
+			// If cursor is the root node
+			if (cursor == root) {
+
+				// Create a new Node
+				Node* newRoot = new Node;
+                index1++;
+
+				// Update rest field of
+				// B+ Tree Node
+				newRoot->key[0] = newLeaf->key[0];
+				newRoot->ptr[0] = cursor;
+				newRoot->ptr[1] = newLeaf;
+				newRoot->IS_LEAF = false;
+				newRoot->size = 1;
+				root = newRoot;
+			}
+			else {
+
+				// Recursive Call for
+				// insert in internal
+				insertInternal(newLeaf->key[0],
+							parent,
+							newLeaf);
+			}
+		}
+	}
 }
 
-ll count_digits(ll n)
+// Function to implement the Insert
+// Internal Operation in B+ Tree
+void BPTree::insertInternal(int x,
+							Node* cursor,
+							Node* child)
 {
-    string num = to_string(n);
-    return num.size();
-}
-unsigned int nextPowerOf2(unsigned int n)
-{
-    n--;
-    n |= n >> 1;
-    n |= n >> 2;
-    n |= n >> 4;
-    n |= n >> 8;
-    n |= n >> 16;
-    n++;
-
-    return log2(n);
-}
-
-ll factorial(ll n)
-{
-    ll factorial = 1;
-    for (ll i = 2; i <= n; i++)
-        factorial = factorial * i;
-    return factorial;
-}
-
-ll nCr(ll n, ll r)
-{
-    return factorial(n) / (factorial(r) * factorial(n - r));
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////CODE////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-ll countArray(ll n, ll k, ll x)
-{
-    if(x!= 1)
-{
-    if(n==3)
-    {
-        ll ans = k - 2;
-        return ans;
-    }
-    else
-    {
-        ll ans1 = pow((ll)k-1, (ll)(n-2), 1000000007);
-        ll ans2 = pow(k-1, n-4, 1000000007);
-        ll ans3 = (ans2 * (k-2))%M;
-        return (ans1 - ans3);
-    }
-}
-else
-{
-    if(n==3)
-    {
-        ll ans = k-1;
-        return ans;
-    }
-    else
-    {
-        ll ans1 = pow((ll)(k-1), (ll)n-3, M);
-        ll ans2 = (ans1 * (k-2))%M;
-        return ans2;
-    }
-}
     
+
+	// If we doesn't have overflow
+	if (cursor->size < t) {
+		int i = 0;
+
+		// Traverse the child node
+		// for current cursor node
+		while (x > cursor->key[i]
+			&& i < cursor->size) {
+			i++;
+            if(i>=cursor->size)
+            break;
+		}
+
+		// Traverse the cursor node
+		// and update the current key
+		// to its previous node key
+		for (int j = cursor->size;
+			j > i; j--) {
+
+			cursor->key[j]
+				= cursor->key[j - 1];
+		}
+
+		// Traverse the cursor node
+		// and update the current ptr
+		// to its previous node ptr
+		for (int j = cursor->size + 1;
+			j > i + 1; j--) {
+			cursor->ptr[j]
+				= cursor->ptr[j - 1];
+		}
+
+		cursor->key[i] = x;
+		cursor->size++;
+		cursor->ptr[i + 1] = child;
+	}
+
+	// For overflow, break the node
+	else {
+
+		// For new Interval
+		Node* newInternal = new Node;
+        index1++;
+        int pp = t;
+		int virtualKey[pp + 1];
+		Node* virtualPtr[pp + 2];
+
+		// Insert the current list key
+		// of cursor node to virtualKey
+		for (int i = 0; i < t; i++) {
+			virtualKey[i] = cursor->key[i];
+		}
+
+		// Insert the current list ptr
+		// of cursor node to virtualPtr
+		for (int i = 0; i < t + 1; i++) {
+			virtualPtr[i] = cursor->ptr[i];
+		}
+
+		int i = 0, j;
+
+		// Traverse to find where the new
+		// node is to be inserted
+		while (x > virtualKey[i]
+			&& i < t) {
+			i++;
+            if(i>=t)
+            break;
+		}
+
+       
+
+		// Traverse the virtualKey node
+		// and update the current key
+		// to its previous node key
+		for (int j = t ;
+			j > i; j--) {
+
+			virtualKey[j]
+				= virtualKey[j - 1];
+		}
+
+		virtualKey[i] = x;
+
+		// Traverse the virtualKey node
+		// and update the current ptr
+		// to its previous node ptr
+		for (int j = t + 1;
+			j > i + 1; j--) {
+
+			virtualPtr[j]
+				= virtualPtr[j - 1];
+		}
+
+		virtualPtr[i + 1] = child;
+		newInternal->IS_LEAF = false;
+
+		cursor->size
+			= (t-1) / 2;
+
+		newInternal->size
+			= (t + 1) / 2;
+
+        for(i = 0; i<cursor->size; i++)
+        {
+            cursor->key[i] = virtualKey[i];
+        }
+
+        for(i =0; i<= cursor->size; i++)
+        {
+            cursor->ptr[i] = virtualPtr[i];
+        }
+
+
+		// Insert new node as an
+		// internal node
+		for (i = 0, j = cursor->size + 1;
+			i < newInternal->size;
+			i++, j++) {
+
+			newInternal->key[i]
+				= virtualKey[j];
+		}
+
+		for (i = 0, j = cursor->size + 1;
+			i < newInternal->size + 1;
+			i++, j++) {
+
+			newInternal->ptr[i]
+				= virtualPtr[j];
+		}
+
+		// If cursor is the root node
+		if (cursor == root) {
+
+			// Create a new root node
+			Node* newRoot = new Node;
+            index1++;
+
+			// Update key value
+			newRoot->key[0]
+				= virtualKey[cursor->size];
+
+			// Update rest field of
+			// B+ Tree Node
+			newRoot->ptr[0] = cursor;
+			newRoot->ptr[1] = newInternal;
+			newRoot->IS_LEAF = false;
+			newRoot->size = 1;
+			root = newRoot;
+		}
+
+		else {
+
+
+
+			// Recursive Call to insert
+			// the data
+			insertInternal(virtualKey[cursor->size],
+						findParent(root,
+									cursor),
+						newInternal);
+		}
+	}
 }
 
-
-   int main()
+// Function to find the parent node
+Node* BPTree::findParent(Node* cursor,
+						Node* child)
 {
-    ofstream fout(getenv("OUTPUT_PATH"));
+	Node* parent;
 
-    string first_multiple_input_temp;
-    getline(cin, first_multiple_input_temp);
+	// If cursor reaches the end of Tree
+	if (cursor->IS_LEAF
+		|| (cursor->ptr[0])->IS_LEAF) {
+		return NULL;
+	}
 
-    vector<string> first_multiple_input = split(rtrim(first_multiple_input_temp));
+	// Traverse the current node with
+	// all its child
+	for (int i = 0;
+		i < cursor->size + 1; i++) {
 
-    ll n = stoi(first_multiple_input[0]);
+		// Update the parent for the
+		// child Node
+		if (cursor->ptr[i] == child) {
+			parent = cursor;
+			return parent;
+		}
 
-    ll k = stoi(first_multiple_input[1]);
+		// Else recursively traverse to
+		// find child node
+		else {
+			parent
+				= findParent(cursor->ptr[i],
+							child);
 
-    ll x = stoi(first_multiple_input[2]);
+			// If parent is found, then
+			// return that parent node
+			if (parent != NULL)
+				return parent;
+		}
+	}
 
-    ll answer = countArray(n, k, x);
-
-    fout << answer << "\n";
-
-    fout.close();
-
-    return 0;
+	// Return parent node
+	return parent;
 }
 
-string ltrim(const string &str) {
-    string s(str);
-
-    s.erase(
-        s.begin(),
-        find_if(s.begin(), s.end(), not1(ptr_fun<int, int>(isspace)))
-    );
-
-    return s;
+// Function to get the root Node
+Node* BPTree::getRoot()
+{
+	return root;
 }
 
-string rtrim(const string &str) {
-    string s(str);
+// Driver Code
+int main()
+{
+    cin>>d>>t;
+    d = 2*d;
+    t = 2*t + 1;
+	BPTree node;
+    int a, b;
+    while(1)
+    {
+        cin>>a;
+        if(a==1)
+        {
+            cin>>b;
+            node.insert(b);
+        }
+        if(a==2)
+        {
+            node.status();
 
-    s.erase(
-        find_if(s.rbegin(), s.rend(), not1(ptr_fun<int, int>(isspace))).base(),
-        s.end()
-    );
-
-    return s;
-}
-
-vector<string> split(const string &str) {
-    vector<string> tokens;
-
-    string::size_type start = 0;
-    string::size_type end = 0;
-
-    while ((end = str.find(" ", start)) != string::npos) {
-        tokens.push_back(str.substr(start, end - start));
-
-        start = end + 1;
+        }
+        if(a==3)
+        {
+            break;
+        }
     }
 
-    tokens.push_back(str.substr(start));
-
-    return tokens;
+	return 0;
 }
-
-    
-
